@@ -1,0 +1,142 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.Master.cs" Inherits="EduX.SiteMaster" %>
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduShare X</title>
+    <link href="Content/Site.css" rel="stylesheet" />
+    <script type="text/javascript">
+        function edxApplyTheme(theme) {
+            var root = document.documentElement;
+            root.classList.remove('theme-light', 'theme-dark');
+
+            if (theme === 'auto') {
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                root.classList.add(prefersDark ? 'theme-dark' : 'theme-light');
+            } else {
+                root.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
+            }
+        }
+
+        function edxSetTheme(theme) {
+            localStorage.setItem('edx-theme', theme);
+            edxApplyTheme(theme);
+            var toggles = document.querySelectorAll('.theme-toggle-input');
+            for (var i = 0; i < toggles.length; i++) {
+                toggles[i].checked = theme === 'dark';
+            }
+            return false;
+        }
+
+        function edxToggleMenu(menuId) {
+            var menu = document.getElementById(menuId);
+            if (!menu) {
+                return false;
+            }
+
+            var isOpen = menu.classList.contains('is-open');
+            var menus = document.querySelectorAll('.profile-shell');
+            for (var i = 0; i < menus.length; i++) {
+                menus[i].classList.remove('is-open');
+            }
+
+            if (!isOpen) {
+                menu.classList.add('is-open');
+            }
+
+            return false;
+        }
+
+        document.addEventListener('click', function (event) {
+            var insideMenu = event.target.closest('.profile-shell');
+            if (!insideMenu) {
+                var menus = document.querySelectorAll('.profile-shell');
+                for (var i = 0; i < menus.length; i++) {
+                    menus[i].classList.remove('is-open');
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var storedTheme = localStorage.getItem('edx-theme') || 'auto';
+            edxApplyTheme(storedTheme);
+            var toggles = document.querySelectorAll('.theme-toggle-input');
+            for (var i = 0; i < toggles.length; i++) {
+                toggles[i].checked = storedTheme === 'dark';
+            }
+        });
+    </script>
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div class="topbar">
+            <div class="container">
+                <div class="brand">
+                    EduShare X
+                    <small>Intelligent academic notes sharing platform</small>
+                </div>
+                <div class="nav">
+                    <a runat="server" href="~/Default.aspx">Home</a>
+                    <a runat="server" href="~/Notes.aspx">Notes</a>
+                    <a id="UploadLink" runat="server" href="~/Upload.aspx">Upload</a>
+                    <a id="DashboardLink" runat="server" href="~/Dashboard.aspx">Dashboard</a>
+                    <a id="ReviewLink" runat="server" href="~/Admin.aspx">Review Desk</a>
+                    <a runat="server" href="~/Analytics.aspx">Analytics</a>
+                    <div class="profile-menu">
+                        <asp:Panel ID="UserPanel" runat="server" CssClass="profile-shell" ClientIDMode="Static">
+                            <a href="#" class="profile-trigger profile-trigger-circle" onclick="return edxToggleMenu('UserPanel');">
+                                <asp:Image ID="ProfilePhotoImage" runat="server" CssClass="profile-avatar" />
+                            </a>
+                            <div class="profile-dropdown">
+                                <div class="profile-card">
+                                    <asp:Label ID="UserLabel" runat="server" CssClass="profile-name" />
+                                    <asp:HyperLink ID="ViewProfileLink" runat="server" NavigateUrl="~/Profile.aspx" CssClass="profile-action">View Details</asp:HyperLink>
+                                    <asp:HyperLink ID="EditProfileLink" runat="server" NavigateUrl="~/Dashboard.aspx#edit-profile" CssClass="profile-action">Edit Profile</asp:HyperLink>
+                                    <div class="theme-toggle-row">
+                                        <span>Dark Theme</span>
+                                        <label class="theme-switch">
+                                            <input type="checkbox" class="theme-toggle-input" onchange="edxSetTheme(this.checked ? 'dark' : 'light');" />
+                                            <span class="theme-slider"></span>
+                                        </label>
+                                    </div>
+                                    <asp:HyperLink ID="SettingsLink" runat="server" NavigateUrl="~/Settings.aspx" CssClass="profile-action">Settings</asp:HyperLink>
+                                    <asp:HyperLink ID="ReviewMenuLink" runat="server" NavigateUrl="~/Admin.aspx" CssClass="profile-action">Review Desk</asp:HyperLink>
+                                    <asp:Button ID="LogoutButton" runat="server" Text="Logout" CssClass="profile-action profile-button" OnClick="LogoutButton_Click" />
+                                </div>
+                            </div>
+                        </asp:Panel>
+                        <asp:Panel ID="GuestPanel" runat="server" CssClass="profile-shell" ClientIDMode="Static">
+                            <a href="#" class="profile-trigger profile-trigger-circle" onclick="return edxToggleMenu('GuestPanel');">
+                                <img src="Content/default-avatar.svg" alt="Guest profile" class="profile-avatar" />
+                            </a>
+                            <div class="profile-dropdown">
+                                <div class="profile-card">
+                                    <div class="profile-welcome">Start sharing notes and build your campus library.</div>
+                                    <asp:HyperLink ID="LoginLink" runat="server" NavigateUrl="~/Login.aspx" CssClass="profile-action">Login</asp:HyperLink>
+                                    <div class="theme-toggle-row">
+                                        <span>Dark Theme</span>
+                                        <label class="theme-switch">
+                                            <input type="checkbox" class="theme-toggle-input" onchange="edxSetTheme(this.checked ? 'dark' : 'light');" />
+                                            <span class="theme-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </asp:Panel>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page">
+            <div class="container">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            </div>
+        </div>
+        <div class="footer">
+            <div class="container">EduShare X uses an actual ASP.NET Master Page so all pages stay consistent.</div>
+        </div>
+    </form>
+</body>
+</html>
